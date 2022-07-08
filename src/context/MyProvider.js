@@ -11,7 +11,6 @@ function MyProvider({ children }) {
     const getFetchAPIfetch = async () => {
       const { results } = await fetch(url)
         .then((response) => response.json());
-      console.log(results);
       results.forEach((r) => delete r.residents);
       setData(results);
     };
