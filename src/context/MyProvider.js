@@ -4,8 +4,8 @@ import PropTypes from 'prop-types';
 import MyContext from './MyContext';
 
 function MyProvider({ children }) {
-  const [data, setData] = useState([]);
   const url = 'https://swapi-trybe.herokuapp.com/api/planets/';
+  const [data, setData] = useState([]);
 
   useEffect(() => {
     const getFetchAPIfetch = async () => {
