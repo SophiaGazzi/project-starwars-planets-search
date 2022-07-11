@@ -1,5 +1,5 @@
 // doc: https://www.homehost.com.br/blog/criar-sites/tabela-html/
-import React, { useContext, useState } from 'react';
+import React, { useContext, useState, useEffect } from 'react';
 import MyContext from '../context/MyContext';
 
 function Table() {
@@ -7,39 +7,63 @@ function Table() {
   const [filterByName, setFilterByName] = useState('');
   const [nameInput, setNameInput] = useState([]);
 
-  const [filteredByCategory, setFilteredByCategory] = useState([]);
+  /* const ESTADO = {
+    column: 'population',
+    comparison: 'maior que',
+    value: '0',
+  }; */
+
+  const [filteredByCategory,
+    setFilteredByCategory] = useState([]);
   const [inputColumn, setInputColumn] = useState('population');
   const [inputCompar, setInputCompar] = useState('maior que');
-  const [inputNumb, setInputNumb] = useState('0');
+  const [inputNumb, setInputNumb] = useState(0);
+  const [filterPlanetas, setFilterPlanetas] = useState(data);
 
-  function handleColumn({ target: { value } }) {
-    setInputColumn(value);
-  }
+  useEffect(() => {
+    const handleFilterValue = () => {
+      const array = filteredByCategory.reduce((acc, filtro) => {
+        if (filtro.comparison === 'maior que') {
+          acc = acc
+            .filter((planet) => Number(planet[filtro.column]) > Number(filtro.value));
+        }
+        if (filtro.comparison === 'menor que') {
+          acc = acc
+            .filter((planet) => Number(planet[filtro.column]) < Number(filtro.value));
+        }
+        if (filtro.comparison === 'igual a') {
+          acc = acc
+            .filter((planet) => Number(planet[filtro.column]) === Number(filtro.value));
+        }
+        return acc;
+      }, [...data]);
+      setFilterPlanetas(array);
+      /* let filData = [...data];
+      if (inputCompar === 'maior que') {
+        filData = filData
+          .filter((planet) => Number(planet[inputColumn]) > Number(inputNumb));
+      } else if (inputCompar === 'menor que') {
+        filData = filData
+          .filter((planet) => Number(planet[inputColumn]) < Number(inputNumb));
+      } else if (inputCompar === 'igual a') {
+        filData = filData
+          .filter((planet) => Number(planet[inputColumn]) === Number(inputNumb));
+      }
+      setFilterPlanetas([...filData]); */
+    };
+    handleFilterValue();
+    setInputColumn('population');
+    setInputCompar('maior que');
+    setInputNumb(0);
+  }, [filteredByCategory]);
 
-  function handleCompar({ target: { value } }) {
-    setInputCompar(value);
-  }
-
-  function handleNumber({ target: { value } }) {
-    setInputNumb(value);
-  }
-
-  function handleFilterValue(event) {
-    event.preventDefault();
-    if (inputCompar === 'maior que') {
-      const filteredData = data
-        .filter((planet) => Number(planet[inputColumn]) > Number(inputNumb));
-      setFilteredByCategory(filteredData);
-    } else if (inputCompar === 'menor que') {
-      const filteredData = data
-        .filter((planet) => Number(planet[inputColumn]) < Number(inputNumb));
-      setFilteredByCategory(filteredData);
-    } else if (inputCompar === 'igual a') {
-      const filteredData = data
-        .filter((planet) => Number(planet[inputColumn]) === Number(inputNumb));
-      setFilteredByCategory(filteredData);
-    }
-  }
+  const handleSetFilter = () => {
+    setFilteredByCategory(
+      [...filteredByCategory, { column: inputColumn,
+        comparison: inputCompar,
+        value: inputNumb }],
+    );
+  };
 
   const handleChange = ({ target: { value } }) => {
     setNameInput(value);
@@ -48,7 +72,7 @@ function Table() {
         .toLowerCase().includes(value.toLowerCase()));
       return setFilterByName(filter);
     }
-    return setFilterByName([]);
+    return setFilterByName('');
   };
 
   return (
@@ -68,14 +92,14 @@ function Table() {
           <select
             id="select-category"
             data-testid="column-filter"
-            onChange={ handleColumn }
             value={ inputColumn }
+            onChange={ ({ target }) => setInputColumn(target.value) }
           >
-            <option>population</option>
-            <option>orbital_period</option>
-            <option>diameter</option>
-            <option>rotation_period</option>
-            <option>surface_water</option>
+            <option value="population">population</option>
+            <option value="orbital_period">orbital_period</option>
+            <option value="diameter">diameter</option>
+            <option value="rotation_period">rotation_period</option>
+            <option value="surface_water">surface_water</option>
           </select>
         </label>
         <label htmlFor="select-operator">
@@ -84,43 +108,43 @@ function Table() {
             id="select-operator"
             data-testid="comparison-filter"
             value={ inputCompar }
-            onChange={ handleCompar }
+            onChange={ ({ target }) => setInputCompar(target.value) }
           >
-            <option>maior que</option>
-            <option>menor que</option>
-            <option>igual a</option>
+            <option value="maior que">maior que</option>
+            <option value="menor que">menor que</option>
+            <option value="igual a">igual a</option>
           </select>
         </label>
         <label htmlFor="input-number">
           <input
             type="number"
             id="input-number"
-            data-testid="value-filter"
             value={ inputNumb }
-            onChange={ handleNumber }
+            data-testid="value-filter"
+            onChange={ ({ target }) => setInputNumb(target.value) }
           />
         </label>
         <button
-          type="submit"
+          type="button"
           data-testid="button-filter"
-          onClick={ handleFilterValue }
+          onClick={ handleSetFilter }
         >
           Adicionar filtro
         </button>
       </form>
       <table>
         <thead>
-          <tr>
+          <tr data-testid="column-header">
             { data.length && Object.keys(data[0])
               .map((title) => <th key={ title }>{title}</th>)}
           </tr>
         </thead>
-        { filteredByCategory[0]
+        { filterPlanetas[0]
           ? (
             <tbody>
               {
-                filteredByCategory.map((planetByCategory) => (
-                  <tr key={ planetByCategory.name }>
+                filterPlanetas.map((planetByCategory, index) => (
+                  <tr key={ index }>
                     <td>{ planetByCategory.name }</td>
                     <td>{ planetByCategory.rotation_period }</td>
                     <td>{ planetByCategory.orbital_period }</td>
