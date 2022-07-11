@@ -2,6 +2,12 @@
 import React, { useContext, useState, useEffect } from 'react';
 import MyContext from '../context/MyContext';
 
+const inicialState = ['population',
+  'orbital_period',
+  'diameter',
+  'rotation_period',
+  'surface_water'];
+
 function Table() {
   const { data } = useContext(MyContext);
   const [filterByName, setFilterByName] = useState('');
@@ -13,12 +19,26 @@ function Table() {
     value: '0',
   }; */
 
+  const [newComparison, setNewComparison] = useState(inicialState);
+
   const [filteredByCategory,
     setFilteredByCategory] = useState([]);
   const [inputColumn, setInputColumn] = useState('population');
   const [inputCompar, setInputCompar] = useState('maior que');
   const [inputNumb, setInputNumb] = useState(0);
   const [filterPlanetas, setFilterPlanetas] = useState(data);
+
+  const newRenderC = () => {
+    const arrayNovo = filteredByCategory.reduce((acc, cat) => {
+      acc = acc.filter((el) => cat.column !== el);
+      return acc;
+    }, [...inicialState]);
+    setNewComparison(arrayNovo);
+  };
+
+  useEffect(() => {
+    newRenderC();
+  }, [filterPlanetas]);
 
   useEffect(() => {
     const handleFilterValue = () => {
@@ -38,18 +58,6 @@ function Table() {
         return acc;
       }, [...data]);
       setFilterPlanetas(array);
-      /* let filData = [...data];
-      if (inputCompar === 'maior que') {
-        filData = filData
-          .filter((planet) => Number(planet[inputColumn]) > Number(inputNumb));
-      } else if (inputCompar === 'menor que') {
-        filData = filData
-          .filter((planet) => Number(planet[inputColumn]) < Number(inputNumb));
-      } else if (inputCompar === 'igual a') {
-        filData = filData
-          .filter((planet) => Number(planet[inputColumn]) === Number(inputNumb));
-      }
-      setFilterPlanetas([...filData]); */
     };
     handleFilterValue();
     setInputColumn('population');
@@ -95,11 +103,14 @@ function Table() {
             value={ inputColumn }
             onChange={ ({ target }) => setInputColumn(target.value) }
           >
-            <option value="population">population</option>
-            <option value="orbital_period">orbital_period</option>
-            <option value="diameter">diameter</option>
-            <option value="rotation_period">rotation_period</option>
-            <option value="surface_water">surface_water</option>
+            {
+              newComparison
+                .map((el) => (
+                  <option value={ el } key={ el }>
+                    {el}
+                  </option>
+                ))
+            }
           </select>
         </label>
         <label htmlFor="select-operator">
