@@ -13,12 +13,6 @@ function Table() {
   const [filterByName, setFilterByName] = useState('');
   const [nameInput, setNameInput] = useState([]);
 
-  /* const ESTADO = {
-    column: 'population',
-    comparison: 'maior que',
-    value: '0',
-  }; */
-
   const [newComparison, setNewComparison] = useState(inicialState);
 
   const [filteredByCategory,
@@ -27,6 +21,18 @@ function Table() {
   const [inputCompar, setInputCompar] = useState('maior que');
   const [inputNumb, setInputNumb] = useState(0);
   const [filterPlanetas, setFilterPlanetas] = useState(data);
+
+  const deleteAllFilters = () => {
+    setFilteredByCategory([]);
+  };
+
+  const clickDeleteFilter = ({ target }) => {
+    const columnChild = target.parentNode.firstChild.innerText;
+    const deleteElFilter = filteredByCategory.filter((element) => (
+      element.column !== columnChild));
+    setNewComparison((prev) => [...prev, columnChild]);
+    setFilteredByCategory(deleteElFilter);
+  };
 
   const newRenderC = () => {
     const arrayNovo = filteredByCategory.reduce((acc, cat) => {
@@ -86,6 +92,7 @@ function Table() {
   return (
     <>
       <label htmlFor="name-filter">
+        Busque por texto:
         <input
           data-testid="name-filter"
           type="text"
@@ -142,6 +149,21 @@ function Table() {
         >
           Adicionar filtro
         </button>
+        { filteredByCategory.length > 0 && filteredByCategory.map((element, index) => (
+          <div key={ index } data-testid="filter">
+            <p>{element.column}</p>
+            <p>{element.comparison}</p>
+            <p>{element.value}</p>
+            <button type="button" onClick={ clickDeleteFilter }>X</button>
+          </div>
+        )) }
+        <button
+          type="button"
+          onClick={ deleteAllFilters }
+          data-testid="button-remove-filters"
+        >
+          Remover filtros
+        </button>
       </form>
       <table>
         <thead>
@@ -196,7 +218,7 @@ function Table() {
                   ))
                 ) : (
                   data.map((planet) => (
-                    <tr key={ planet.name }>
+                    <tr key={ planet.name } data-testid={ planet.name }>
                       <td>{ planet.name }</td>
                       <td>{ planet.rotation_period }</td>
                       <td>{ planet.orbital_period }</td>
